@@ -4,74 +4,266 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
 
+
+/*
+ * ============================================================
+ * KobitoKey QWERTY2
+ * 5 Layer / JIS oriented keymap
+ *
+ * Layer 0 : BASE
+ * Layer 1 : SHORTCUT / MOUSE
+ * Layer 2 : SYMBOL / NAVIGATION
+ * Layer 3 : NUMBER / SYMBOL
+ * Layer 4 : FUNCTION
+ * ============================================================
+ */
+
+
 / {
-    combos {
-        compatible = "zmk,combos";
+    behaviors {
 
-        combo_eisu {
-            timeout-ms = <50>;
-            key-positions = <12 13>;
-            bindings = <&kp LANG2>;
+        /*
+         * TD(1) 相当
+         * Tap  : TAB
+         * Hold : Q
+         */
+        td1: td1 {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&kp>, <&kp>;
         };
 
-        combo_kana {
-            timeout-ms = <50>;
-            key-positions = <16 17>;
-            bindings = <&kp LANG1>;
+
+        /*
+         * TD(0) 相当
+         * Tap  : ENTER
+         * Hold : TO(layer)
+         *
+         * 使用例:
+         * &td0 1 ENTER
+         */
+        td0: td0 {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&to>, <&kp>;
         };
 
-        combo_esc {
-            timeout-ms = <50>;
-            key-positions = <0 1>;
-            bindings = <&kp ESC>;
-        };
 
-        combo_tab {
-            timeout-ms = <50>;
-            key-positions = <10 11>;
-            bindings = <&kp TAB>;
+        /*
+         * GUI / Mouse2
+         * Hold : LGUI
+         * Tap  : Mouse2
+         */
+        gui_mb2: gui_mb2 {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&kp>, <&mkp>;
         };
     };
+
 
     keymap {
         compatible = "zmk,keymap";
 
+
+        /*
+         * =====================================================
+         * Layer 0 : BASE
+         * =====================================================
+         *
+         * TD1 W E R T | Y U I O P
+         * A   S D F G | H J K L TD0
+         * Z   X C V B | N M , . =
+         *
+         * JIS用:
+         *   無変換      = INT5
+         *   半角/全角   = LANG5
+         *
+         * ZMKでは INT5 が無変換、
+         * LANG5 が半角/全角として定義されています。
+         */
+
         default_layer {
+            label = "BASE";
+
             bindings = <
-&kp Q      &kp W     &kp E     &kp R        &kp T      &kp Y     &kp U        &kp I      &kp O      &kp P
-&kp A      &kp S     &kp D     &kp F        &kp G      &kp H     &kp J        &kp K      &kp L      &kp SEMI
-&kp Z      &kp X     &kp C     &kp V        &kp B      &kp N     &kp M        &kp COMMA  &kp DOT    &kp APOS
-&kp LSHFT  &kp LALT  &kp LCMD  &lt 2 SPACE  &kp LCTRL  &kp BSPC  &lt 1 ENTER  &kp RSHFT  &kp RSHFT  &mt LALT SLASH
+/* ─────────────── 左手 ─────────────── */                 /* ─────────────── 右手 ─────────────── */
+
+/* row 0 */
+&td1 Q TAB     &kp W          &kp E          &kp R           &kp T
+&kp Y          &kp U          &kp I          &kp O           &kp P
+
+/* row 1 */
+&kp A          &kp S          &kp D          &kp F           &kp G
+&kp H          &kp J          &kp K          &kp L           &td0 1 ENTER
+
+/* row 2 */
+&kp Z          &mt LSHIFT X   &kp C          &kp V           &kp B
+&kp N          &kp M          &kp COMMA      &mt LSHIFT DOT  &kp LS(MINUS)
+
+/* thumb row */
+&gui_mb2 LGUI MB2
+&lt 4 ESC
+&mt LALT INT5
+&mt LCTRL LANG5
+&lt 3 SPACE
+
+&lt 3 SPACE
+&lt 2 BSPC
+&kp RSHIFT
+&kp RALT
+&mkp MB1
             >;
         };
+
+
+        /*
+         * =====================================================
+         * Layer 1 : SHORTCUT / MOUSE
+         * =====================================================
+         *
+         * 画像のLayer 1をベースにしています。
+         *
+         * TD5/TD6/TD7、M0、0x7e40 は、
+         * 画像だけでは動作内容を確定できないため
+         * 安全な通常キー / none としています。
+         */
 
         layer1 {
-            label = "NUMBER";
+            label = "SHORTCUT";
+
             bindings = <
-&kp N0     &kp N1  &kp N2  &kp N3     &trans  &kp MINUS  &trans     &kp UP    &trans     &trans
-&kp EQUAL  &kp N4  &kp N5  &kp N6     &trans  &kp PLUS   &kp LEFT   &kp DOWN  &kp RIGHT  &trans
-&trans     &kp N7  &kp N8  &kp N9     &trans  &kp ASTRK  &kp SLASH  &kp LBKT  &kp RBKT   &trans
-&trans     &trans  &trans  &kp LSHFT  &trans  &trans     &trans     &trans    &trans     &trans
+/* row 0 */
+&td1 Q TAB     &kp W          &kp E          &kp LC(R)       &kp LC(T)
+&kp LC(Z)      &kp LC(X)      &kp LC(C)      &kp LC(V)       &none
+
+/* row 1 */
+&kp A          &kp S          &kp D          &kp F           &kp G
+&kp H          &mkp MB1       &mkp MB2       &none           &mt LCTRL ENTER
+
+/* row 2 */
+&kp Z          &mt LSHIFT X   &kp C          &kp V           &kp B
+&kp TAB        &kp LCTRL      &kp LALT       &kp DOT         &kp DEL
+
+/* thumb row */
+&trans         &trans         &trans         &trans           &trans
+&trans         &trans         &trans         &trans           &trans
             >;
         };
+
+
+        /*
+         * =====================================================
+         * Layer 2 : SYMBOL / NAVIGATION
+         * =====================================================
+         *
+         * Windows JIS 106/109 keyboard 前提。
+         *
+         * JIS HID位置:
+         *
+         * EQUAL      = ^ / ~
+         * LBKT       = @ / `
+         * RBKT       = [ / {
+         * BSLH       = ] / }
+         * APOS       = : / *
+         * SEMI       = ; / +
+         * INT3       = ¥ / |
+         * INT1       = \ / _
+         *
+         * ZMKの INT1/INT3 は
+         * 日本語キーボード用 International keycode。
+         */
 
         layer2 {
-            label = "FUNCTION";
+            label = "SYMBOL_NAV";
+
             bindings = <
-&bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4    &kp F1   &kp F2   &kp F3  &kp F4  &kp F5
-&trans        &trans        &trans        &trans        &bt BT_CLR      &kp F6   &kp F7   &kp F8  &kp F9  &kp F10
-&trans        &trans        &trans        &trans        &bt BT_CLR_ALL  &kp F11  &kp F12  &trans  &trans  &trans
-&trans        &trans        &trans        &trans        &trans          &kp DEL  &trans   &trans  &trans  &trans
+/* row 0 : 記号 */
+&kp LS(EQUAL)  &kp LBKT       &kp LS(N3)      &kp LS(N4)      &kp LS(N5)
+&kp EQUAL      &kp LS(N6)     &kp LS(LBKT)    &kp INT3        &kp LS(INT3)
+
+/* row 1 : 括弧 + Cursor */
+&kp LS(N1)     &kp LS(RBKT)   &kp LS(BSLH)    &kp LS(N8)      &kp LS(N9)
+&kp LEFT       &kp DOWN       &kp UP          &kp RIGHT       &td0 1 ENTER
+
+/* row 2 : [] + Navigation */
+&kp LS(SLASH)  &kp RBKT       &kp BSLH        &none           &none
+&kp HOME       &kp PG_DN      &kp PG_UP       &kp END         &mt LGUI DEL
+
+/* thumb row */
+&trans         &trans         &trans           &trans          &trans
+&trans         &trans         &trans           &trans          &trans
             >;
         };
 
+
+        /*
+         * =====================================================
+         * Layer 3 : NUMBER / SYMBOL
+         * =====================================================
+         *
+         * 画像の数字・記号レイヤー。
+         *
+         * JIS配列では数字列のShift記号がUS配列と異なるため、
+         * Windows側を「日本語キーボード 106/109」にします。
+         */
+
         layer3 {
-            label = "MOUSE";
+            label = "NUMBER_SYMBOL";
+
             bindings = <
-&trans     &trans  &trans    &trans    &trans  &trans  &mkp MB1  &mkp MB3  &mkp MB2  &trans
-&trans     &trans  &trans    &trans    &trans  &trans  &trans    &trans    &trans    &trans
-&trans     &trans  &trans    &trans    &trans  &trans  &trans    &trans    &trans    &trans
-&kp LSHFT  &trans  &kp LCMD  &kp LALT  &to 0   &trans  &trans    &trans    &to 0     &kp RALT
+/* row 0 : ! " # $ % | & ' ( ) 0 */
+&kp LS(N1)     &kp LS(N2)     &kp LS(N3)      &kp LS(N4)       &kp LS(N5)
+&kp LS(N6)     &kp LS(N7)     &kp LS(N8)      &kp LS(N9)       &kp N0
+
+/* row 1 */
+&kp LS(N7)     &kp APOS       &kp LS(MINUS)   &kp MINUS        &kp LS(SLASH)
+&kp BSPC       &kp N4         &kp N5          &kp N6           &td0 1 ENTER
+
+/* row 2 */
+&kp LS(N2)     &kp LS(SEMI)   &kp INT1        &kp LS(INT1)     &kp LS(EQUAL)
+&kp N0         &kp LS(N1)     &kp LS(N2)      &kp LS(N3)       &kp LS(DOT)
+
+/* thumb row */
+&trans         &trans         &trans           &trans           &lt 4 DEL
+&lt 4 DEL      &trans         &trans           &trans           &trans
+            >;
+        };
+
+
+        /*
+         * =====================================================
+         * Layer 4 : FUNCTION
+         * =====================================================
+         *
+         * 画像どおり F1～F10。
+         */
+
+        layer4 {
+            label = "FUNCTION";
+
+            bindings = <
+/* row 0 */
+&kp F1         &kp F2         &kp F3          &kp F4          &kp F5
+&kp F6         &kp F7         &kp F8          &kp F9          &kp F10
+
+/* row 1 */
+&none          &none          &none           &none           &none
+&none          &none          &none           &none           &none
+
+/* row 2 */
+&none          &none          &none           &none           &none
+&none          &none          &none           &none           &none
+
+/* thumb row */
+&trans         &trans         &trans           &trans          &trans
+&trans         &trans         &trans           &trans          &trans
             >;
         };
     };
